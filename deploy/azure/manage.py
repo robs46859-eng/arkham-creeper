@@ -52,6 +52,13 @@ database=sqlite3.connect('/var/lib/arkham-creeper/deep-water.sqlite3')
 database.row_factory=sqlite3.Row
 rows=[dict(row) for row in database.execute('SELECT delivery,event,digest,state,attempts,report,error FROM jobs ORDER BY received DESC LIMIT 3')]
 database.close()
+for row in rows:
+    if row['report']:
+        report=json.loads(row['report'])
+        gemma=report.get('gemma',{})
+        row['report']={key:report.get(key) for key in ['source','disposition','elapsed_ms','patch_applied']}
+        row['report']['file_count']=len(report.get('files',[]))
+        row['report']['gemma']={key:gemma.get(key) for key in ['status','model','model_digest','prompt_tokens','output_tokens','unloaded_after_review']}
 print(base64.b64encode(zlib.compress(json.dumps(rows,separators=(',',':')).encode())).decode())
 PY"""
         result = json.loads(zlib.decompress(base64.b64decode(run_script(subscription, script))))

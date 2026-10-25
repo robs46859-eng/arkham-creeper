@@ -17,7 +17,7 @@ Review the generated template, then use the same arguments with `--create`. The 
 - `connect-webhook`: creates the public repository webhook, forwarding the signing secret directly from the protected server environment to GitHub without printing it.
 - `test-push`: asks GitHub to send its real latest-push test event without changing repository code.
 - `deliveries`: records only receipt metadata, excluding webhook request signatures and payloads.
-- `reports`: retrieves the latest private-on-disk reports through Azure Run Command.
+- `reports`: retrieves compact completion metadata for the latest three jobs through Azure Run Command, including source provenance, file counts, and model execution metrics. Full file findings and model text remain in the private server database so larger reports do not exceed the command-output limit.
 - `enable-gemma`: deploys reviewed public source and enables an already-installed local Gemma model.
 - `gemma-demo`: runs fictional-code scenarios through actual inference and publishes only their report HTML/JSON. Source BLOBs and state databases are not served.
 

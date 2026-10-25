@@ -22,9 +22,9 @@ The input scenarios are synthetic and explicitly labeled. These numbers establis
 
 One model error is visible in the run: Gemma describes the benign repeated formatter as potentially vulnerable to injection despite no injected execution or SQL sink. The report labels model opinions as unverified and identifies this as a false positive. The model output is preserved, and no automatic security action follows it.
 
-## GitHub Copilot category — workflow prepared, execution pending
+## GitHub Copilot category — GitHub Actions automation executed
 
-The challenge’s category description includes automating a project with GitHub Actions. `.github/workflows/ci.yml` runs the focused tests and fictional-data demonstration with read-only repository permissions. The workflow must be pushed and successfully executed before it is claimed as an implemented partner entry. Copilot itself was not used in this implementation.
+The challenge’s category description includes automating a project with GitHub Actions. `.github/workflows/ci.yml` runs the focused tests and fictional-data demonstration with read-only repository permissions. [Run 40222966656](https://github.com/robs46859-eng/arkham-creeper/actions/runs/40222966656) passed both steps on public commit `9b60f838d6e5bde61018bdcfaf32d0dc8bd14b17`. This provides executed evidence for that automation path, not a guarantee of prize eligibility. Copilot itself was not used in this implementation.
 
 ## Additional categories
 
