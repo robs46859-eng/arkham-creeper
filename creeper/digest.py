@@ -4,11 +4,15 @@ import re
 import time
 
 from .source import validate_sources
+from .ingress import LeaseLost
+
+
+MAX_FINDINGS_PER_FILE = 256
 
 
 RULES = [
     ("shell_execution", re.compile(r"shell\s*=\s*True"), "Review shell construction; use a fixed executable and argument list."),
-    ("sql_interpolation", re.compile(r"(?:f[\"']|`)[^\n]*(?:SELECT|INSERT|UPDATE|DELETE)[^\n]*(?:\{|\$\{)", re.I), "Use parameterized SQL; validate tenant and consent independently."),
+    ("sql_interpolation", re.compile(r"^(?>[^\n]*?(?:f[\"']|`))(?>[^\n]*?(?:SELECT|INSERT|UPDATE|DELETE))[^\n]*(?:\{|\$\{)", re.I | re.M), "Use parameterized SQL; validate tenant and consent independently."),
     ("dynamic_execution", re.compile(r"\b(?:eval|exec)\s*\("), "Remove dynamic evaluation of untrusted content."),
 ]
 
@@ -53,17 +57,22 @@ def digest_once(water, resolver, model, reviewer=None):
         payload = json.loads(job["payload"])
         sources, provenance = resolver(job["event"], payload)
         validate_sources(sources)
-        water.store_sources(job, sources)
+        if not water.store_sources(job, sources):
+            raise LeaseLost("Source claim is no longer current")
         reports = []
         for source in sources:
             content = source["content"]
             findings = []
+            finding_count = 0
             for rule, pattern, recommendation in RULES:
                 for match in pattern.finditer(content):
-                    findings.append({"rule": rule, "line": content.count("\n", 0, match.start()) + 1,
-                                     "status": "review_required", "recommendation": recommendation})
+                    finding_count += 1
+                    if len(findings) < MAX_FINDINGS_PER_FILE:
+                        findings.append({"rule": rule, "line": content.count("\n", 0, match.start()) + 1,
+                                         "status": "review_required", "recommendation": recommendation})
             reports.append({"path": source["path"], "sha256": hashlib.sha256(content.encode()).hexdigest(),
-                            "bytes": len(content.encode()), "spatial": model.score(content), "findings": findings})
+                            "bytes": len(content.encode()), "spatial": model.score(content), "findings": findings,
+                            "finding_count": finding_count, "findings_truncated": finding_count > len(findings)})
         disposition = "no_configured_rule_match"
         if any(item["spatial"]["anomalous"] for item in reports):
             disposition = "novelty_review_required"
@@ -78,8 +87,11 @@ def digest_once(water, resolver, model, reviewer=None):
             if disposition == "no_configured_rule_match" and report["gemma"].get("review", {}).get("priority") == "review":
                 report["disposition"] = "advisory_review_required"
             report["elapsed_ms"] = round((time.perf_counter() - started) * 1000, 3)
-        water.finish(job, report=report)
+        if not water.finish(job, report=report):
+            raise LeaseLost("Report claim is no longer current")
         return report
     except Exception as error:
-        water.finish(job, error=type(error).__name__)
-        return {"delivery": job["delivery"], "disposition": "analysis_unavailable", "error": type(error).__name__}
+        error_name = type(error).__name__
+        if not water.finish(job, error=error_name):
+            error_name = "LeaseLost"
+        return {"delivery": job["delivery"], "disposition": "analysis_unavailable", "error": error_name}

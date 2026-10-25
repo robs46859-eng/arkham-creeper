@@ -13,12 +13,12 @@ Review the generated template, then use the same arguments with `--create`. The 
 
 `manage.py` provides narrowly scoped operations for the dedicated resource group and VM:
 
-- `status`: service and listener health.
+- `status`: checks each required service and the completed-bootstrap marker before probing listener health; any failed check fails the operation.
 - `connect-webhook`: creates the public repository webhook, forwarding the signing secret directly from the protected server environment to GitHub without printing it.
 - `test-push`: asks GitHub to send its real latest-push test event without changing repository code.
 - `deliveries`: records only receipt metadata, excluding webhook request signatures and payloads.
 - `reports`: retrieves compact completion metadata for the latest three jobs through Azure Run Command, including source provenance, file counts, and model execution metrics. Full file findings and model text remain in the private server database so larger reports do not exceed the command-output limit.
-- `enable-gemma`: deploys reviewed public source and enables an already-installed local Gemma model.
+- `enable-gemma`: stages reviewed public source and validates the already-installed local Gemma model before stopping services. This is a package-only update: changed dependency requirements or service units are rejected before stopping, because those need a separate reviewed deployment. A failed update restores the previous package, protected environment, license, and previously active services. If restoration itself fails, the protected backup is retained and its path is reported for operator recovery.
 - `gemma-demo`: runs fictional-code scenarios through actual inference and publishes only their report HTML/JSON. Source BLOBs and state databases are not served.
 
 Each operation takes `--subscription` and `--work`. The local work directory contains operational receipts and must not be published as source. `install-gemma.sh` installs the pinned official Ollama runtime and model on the new VM, binds inference to loopback, and limits it to one loaded model. Model terms are separate from the code license.

@@ -1,6 +1,8 @@
 # The Arkham Creeper
 
-A passive Man o’ War orchestrator: float on repository webhooks, capture signed deliveries, keep source inert, and digest it later with local open-source AI.
+A biomimetic code-review Symbiont: a Man o’ War captures repository events, with nutcracker-inspired novelty memory, prairie-dog signal triage, dolphin-inspired model rest, wolf-like provenance, and beaver-like workflow resilience. These are engineering metaphors, not six autonomous agents.
+
+The passive pipeline floats on repository webhooks, captures signed deliveries, keeps source inert, and digests it later with local open-source AI. See the [six animal-inspired roles and their limits](docs/BIOMIMETIC_DESIGN.md).
 
 ## Implemented
 
@@ -9,6 +11,7 @@ A passive Man o’ War orchestrator: float on repository webhooks, capture signe
 - **Deep water:** private SQLite payload/source BLOBs, transactional claims, leases, stale-worker fencing, retries, dead letters, backlog limits.
 - **Digestion:** read-only retrieval pinned to signed commit SHAs, IsolationForest novelty scoring, configured review rules, and optional local Gemma review with source hashes, model digest, latency, and token counts.
 - **Evidence:** actual HTTP, SQLite, and model execution with fictional source and explicit pass/fail checks.
+- **Virtual rehearsal:** trusted fictional HTTP tenant/consent contracts, with identical probes against a secure fixture and two deliberately faulty controls. These are separate from captured source and must not be treated as real-application certification.
 
 No verified zero-days, automatic patching, OS sandbox, complete vulnerability detection, or production containment is claimed. IsolationForest is an anomaly detector, not CART. The original prototype’s hardcoded findings and unsupported patch/branch claims have been replaced. Gemma inference is recorded only when explicitly enabled and successfully completed.
 
@@ -47,6 +50,8 @@ Acknowledgement proves queue persistence, not scan completion. Failed/partial re
 
 See [architecture and production boundaries](docs/ARCHITECTURE.md). The stdlib listener requires a production TLS reverse proxy. SQLite needs persistent single-host storage, not ephemeral autoscaling instances.
 
+See [beyond observability](docs/BEYOND_OBSERVABILITY.md) for the distinct assurance direction, its executed negative-control demonstration, and the work still needed before application-specific release gates.
+
 ## Public and private stay separate
 
 Keep private adapters, source snapshots, credentials, and evidence outside this public repository. Private installations get separate secrets, repository allowlists, read-only credentials, service identities, and state volumes. The public UI must never receive private code or patient records.
@@ -62,7 +67,7 @@ export CREEPER_GEMMA_MODEL=gemma3:1b
 .venv/bin/python -m creeper.simulate --gemma-model gemma3:1b
 ```
 
-Gemma reads at most three source excerpts of 1,200 characters each, prioritizing existing review signals. It drafts a summary and recommendations, records actual tokens and runtime, requests immediate unload, and observes whether the model remains loaded. Excerpt truncation is explicit. No model response is executed or applied. Gemma cannot downgrade configured findings. If configured inference fails, the job retries and is not reported as completed. Default simulation without `--gemma-model` still uses IsolationForest only.
+Gemma reads at most three source excerpts of 1,200 characters each, prioritizing existing review signals. The entire prompt, including metadata, is capped at 2,000 UTF-8 bytes with a 4,096-token context configuration; actual excerpts may be shorter and their lengths are recorded. It drafts a summary and at most three recommendations, records actual tokens and runtime, requests immediate unload, and observes whether the model remains loaded. Model-tag digest changes fail the review rather than silently changing provenance. No model response is executed or applied. Gemma cannot downgrade configured findings. If configured inference fails, the job retries and is not reported as completed. Default simulation without `--gemma-model` still uses IsolationForest only.
 
 Gemma model use is governed separately by [Google’s Gemma terms](https://ai.google.dev/gemma/terms), not this repository’s MIT license. The [official Ollama model listing](https://ollama.com/library/gemma3:1b) identifies the model artifact.
 

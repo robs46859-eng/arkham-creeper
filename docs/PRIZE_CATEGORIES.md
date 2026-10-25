@@ -8,19 +8,20 @@ The [challenge criteria](https://dev.to/challenges/hacktoberfest-week3-2026-10-1
 
 Measured fictional-code run on October 25, 2026:
 
-- Four actual Gemma reviews; 16 orchestration assertions passed.
-- 1,072 prompt tokens and 398 generated tokens, measured by the local runtime.
-- Review elapsed times: 10.342, 10.986, 12.986, and 19.947 seconds on the small CPU server.
+- Four actual Gemma reviews; 18 orchestration/rehearsal assertions passed in the reviewed run at 19:12 UTC.
+- 1,073 prompt tokens and 437 generated tokens, measured by the local runtime.
+- Review elapsed times: 11.560, 10.583, 14.121, and 20.553 seconds on the small CPU server.
 - The model was absent from Ollama’s running-model list after each review following `keep_alive: 0`.
 - Model: `gemma3:1b`, Gemma family `gemma3`, quantization `Q4_K_M`.
 - Model digest: `97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c`.
-- Runtime: Ollama 0.40.11. Eighteen focused tests pass locally.
+- Runtime: Ollama 0.40.11. The reviewed suite has 49 focused tests.
+- A separate trusted virtual HTTP fixture passes 13 tenant/consent probes; identical probes detect both deliberately faulty controls. This does not execute incoming code or certify a real application.
 
 [View measured demonstration](https://arkham-creeper-hf26-b0760a60.northcentralus.cloudapp.azure.com/demo/report.html) · [Machine-readable evidence](https://arkham-creeper-hf26-b0760a60.northcentralus.cloudapp.azure.com/demo/report.json)
 
 The input scenarios are synthetic and explicitly labeled. These numbers establish execution, not production detection accuracy, verified vulnerabilities, clinical outcomes, or human time saved. The original generation cap truncated some reviews; incomplete output failed safely, the cap and response length instructions were corrected, and a regression test was added before the successful run.
 
-One model error is visible in the run: Gemma describes the benign repeated formatter as potentially vulnerable to injection despite no injected execution or SQL sink. The report labels model opinions as unverified and identifies this as a false positive. The model output is preserved, and no automatic security action follows it.
+One model error is visible in the reviewed run: Gemma suggests vulnerabilities in the benign fixture's ordinary dictionary `get()` despite no injected execution or SQL sink. The report labels model opinions as unverified and identifies risk claims about that fixture as false positives. The model output is preserved, and no automatic security action follows it.
 
 ## GitHub Copilot category — GitHub Actions automation executed
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from creeper.digest import SpatialModel, digest_once
 from creeper.ingress import DeepWater, MAX_BODY, Rejected, Sail
-from creeper.source import GitHubSources, safe_path
+from creeper.source import GitHubSources, MAX_FILES, MAX_SOURCE, safe_path
 
 
 SECRET = "test-only-webhook-secret-32-characters"
@@ -19,6 +19,12 @@ REPOSITORY = "example/synthetic-clinic"
 def signed(body, delivery="delivery-1", event="push"):
     return {"X-GitHub-Delivery": delivery, "X-GitHub-Event": event,
             "X-Hub-Signature-256": "sha256=" + hmac.new(SECRET.encode(), body, hashlib.sha256).hexdigest()}
+
+
+def github_content(path, content):
+    digest = hashlib.sha1(b"blob " + str(len(content)).encode() + b"\0" + content).hexdigest()
+    return {"type": "file", "path": path, "sha": digest, "size": len(content),
+            "encoding": "base64", "content": base64.b64encode(content).decode()}
 
 
 class OrchestrationTests(unittest.TestCase):
@@ -116,7 +122,7 @@ class OrchestrationTests(unittest.TestCase):
         self.assertEqual([path.name for path in Path(self.temporary.name).iterdir()], ["deep-water.sqlite3"])
 
     def test_traversal_and_unexpected_sources_fail_closed(self):
-        for path in ["../escape.py", "/absolute.py", "safe/../../bad", ".git/config", "back\\slash"]:
+        for path in ["../escape.py", "/absolute.py", "safe/../../bad", ".git/config", "back\\slash", ".", "./source.py", "safe//source.py"]:
             with self.assertRaises(ValueError):
                 safe_path(path)
         self.sail.capture(signed(self.body), self.body)
@@ -126,11 +132,12 @@ class OrchestrationTests(unittest.TestCase):
     def test_github_pins_contents_to_signed_commit_and_ignores_urls(self):
         source = GitHubSources([REPOSITORY])
         endpoints = []
+        content = github_content("service/read.py", b"print('hi')\n")
         def get(endpoint):
             endpoints.append(endpoint)
             if "/compare/" in endpoint:
-                return {"status": "ahead", "files": [{"filename": "service/read.py", "status": "modified"}]}
-            return {"type": "file", "size": 12, "encoding": "base64", "content": base64.b64encode(b"print('hi')\n").decode()}
+                return {"status": "ahead", "files": [{"filename": "service/read.py", "status": "modified", "sha": content["sha"]}]}
+            return content
         source.get = get
         payload = json.loads(self.body)
         payload["repository"]["url"] = "http://169.254.169.254/"
@@ -140,6 +147,66 @@ class OrchestrationTests(unittest.TestCase):
         self.assertEqual(provenance["after"], "b" * 40)
         self.assertTrue(endpoints[-1].endswith("?ref=" + "b" * 40))
         self.assertTrue(all(endpoint.startswith("/repos/" + REPOSITORY) for endpoint in endpoints))
+
+    def test_github_incomplete_comparisons_fail_closed(self):
+        source = GitHubSources([REPOSITORY])
+        cases = [None, [], {"status": "ahead"}, {"status": "ahead", "files": None},
+                 {"status": "ahead", "files": {}}, {"status": "ahead", "files": [{}]},
+                 {"status": "ahead", "files": [{"filename": "source.py", "status": "unknown"}]},
+                 {"status": "ahead", "files": [{"filename": "source.py", "status": "added"}]}]
+        for response in cases:
+            with self.subTest(response=response):
+                source.get = lambda _endpoint: response
+                with self.assertRaises(ValueError):
+                    source("push", json.loads(self.body))
+
+    def test_github_checks_returned_path_blob_and_size(self):
+        source = GitHubSources([REPOSITORY])
+        valid = github_content("source.py", b"return record\n")
+        comparison = {"status": "ahead", "files": [{"filename": "source.py", "status": "added", "sha": valid["sha"]}]}
+        cases = [None, [], {**valid, "path": "other.py"}, {**valid, "sha": "c" * 40},
+                 {**valid, "size": len(b"return record\n") + 1}, {**valid, "size": True},
+                 {**valid, "type": "symlink"}, {**valid, "submodule_git_url": "https://example.invalid/repo"},
+                 {**valid, "content": "!invalid-base64!"},
+                 {**valid, "content": base64.b64encode(b"exec(source)\n").decode()}]
+        for response in cases:
+            with self.subTest(response=response):
+                source.get = lambda endpoint: comparison if "/compare/" in endpoint else response
+                with self.assertRaises(ValueError):
+                    source("push", json.loads(self.body))
+
+    def test_github_new_branch_tree_excludes_links_and_requires_complete_schema(self):
+        source = GitHubSources([REPOSITORY])
+        payload = {**json.loads(self.body), "before": "0" * 40}
+        content = github_content("source.py", b"return record\n")
+        cases = [{"tree": []}, {"truncated": True, "tree": []}, {"truncated": False, "tree": None},
+                 {"truncated": False, "tree": [{"path": "source.py", "type": "blob", "mode": "120000", "sha": content["sha"]}]},
+                 {"truncated": False, "tree": [{"path": "module", "type": "commit", "mode": "160000", "sha": "c" * 40}]}]
+        for response in cases:
+            with self.subTest(response=response):
+                source.get = lambda _endpoint: response
+                with self.assertRaises(ValueError):
+                    source("push", payload)
+        tree = {"truncated": False, "tree": [{"path": "source.py", "type": "blob", "mode": "100755", "sha": content["sha"]}]}
+        source.get = lambda endpoint: tree if "/git/trees/" in endpoint else content
+        files, _provenance = source("push", payload)
+        self.assertEqual(files, [{"path": "source.py", "content": "return record\n"}])
+
+    def test_github_file_and_total_byte_bounds(self):
+        source = GitHubSources([REPOSITORY])
+        content = github_content("source.py", b"x" * MAX_SOURCE)
+        entries = [{"filename": f"source-{index}.py", "status": "added", "sha": content["sha"]} for index in range(MAX_FILES + 1)]
+        source.get = lambda _endpoint: {"status": "ahead", "files": entries}
+        with self.assertRaisesRegex(ValueError, "source_file_limit"):
+            source("push", json.loads(self.body))
+        def get(endpoint):
+            if "/compare/" in endpoint:
+                return {"status": "ahead", "files": entries[:9]}
+            path = endpoint.split("/contents/", 1)[1].split("?", 1)[0]
+            return {**content, "path": path}
+        source.get = get
+        with self.assertRaisesRegex(ValueError, "source_byte_limit"):
+            source("push", json.loads(self.body))
 
     def test_comparison_truncation_and_forks_require_review(self):
         source = GitHubSources([REPOSITORY])

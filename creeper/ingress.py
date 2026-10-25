@@ -19,6 +19,10 @@ class Rejected(Exception):
         super().__init__(reason)
 
 
+class LeaseLost(RuntimeError):
+    pass
+
+
 class DeepWater:
     def __init__(self, root, capacity=1000):
         self.root = Path(root)
@@ -81,16 +85,18 @@ class DeepWater:
         with self.connect() as database:
             if error:
                 state = "dead" if job["attempts"] >= 3 else "pending"
-                database.execute("UPDATE jobs SET state=?,error=?,available=?,lease_until=NULL WHERE delivery=? AND state='processing' AND lease_token=?",
+                result = database.execute("UPDATE jobs SET state=?,error=?,available=?,lease_until=NULL WHERE delivery=? AND state='processing' AND lease_token=?",
                                  (state, error, time.time() + 2 ** job["attempts"], job["delivery"], job["lease_token"]))
             else:
-                database.execute("UPDATE jobs SET state='done',report=?,error=NULL,lease_until=NULL WHERE delivery=? AND state='processing' AND lease_token=?",
+                result = database.execute("UPDATE jobs SET state='done',report=?,error=NULL,lease_until=NULL WHERE delivery=? AND state='processing' AND lease_token=?",
                                  (json.dumps(report), job["delivery"], job["lease_token"]))
+            return result.rowcount == 1
 
     def store_sources(self, job, sources):
         with self.connect() as database:
-            database.execute("UPDATE jobs SET sources=? WHERE delivery=? AND state='processing' AND lease_token=?",
+            result = database.execute("UPDATE jobs SET sources=? WHERE delivery=? AND state='processing' AND lease_token=?",
                              (json.dumps(sources).encode(), job["delivery"], job["lease_token"]))
+            return result.rowcount == 1
 
     def records(self):
         with self.connect() as database:

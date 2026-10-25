@@ -31,6 +31,115 @@ def run_script(subscription, script):
     return stdout.strip()
 
 
+def status_script():
+    return """set -euo pipefail
+for service in creeper-listener creeper-worker nginx; do
+    systemctl is-active --quiet "$service"
+    printf '%s active\\n' "$service"
+done
+test -f /var/lib/arkham-creeper/bootstrap-complete
+echo bootstrap-complete
+curl --fail --silent http://127.0.0.1:8787/healthz
+"""
+
+
+def gemma_update_script(source):
+    encoded = base64.b64encode(source).decode()
+    return """set -euo pipefail
+umask 077
+application=/opt/arkham-creeper
+environment=/etc/arkham-creeper/environment
+test -f /var/lib/ollama/gemma-ready
+staging=$(mktemp -d /opt/creeper-update.XXXXXX)
+update_started=0
+listener_was_active=0
+worker_was_active=0
+finish_update() {
+    outcome=$?
+    trap - EXIT
+    set +e
+    restoration_failed=0
+    if [ "$outcome" -ne 0 ] && [ "$update_started" -eq 1 ]; then
+        systemctl stop creeper-worker creeper-listener || restoration_failed=1
+        if [ -d "$staging/old-creeper" ]; then
+            if [ -d "$application/creeper" ]; then
+                mv "$application/creeper" "$staging/failed-creeper" || restoration_failed=1
+            fi
+            mv "$staging/old-creeper" "$application/creeper" || restoration_failed=1
+        fi
+        cp -p "$staging/old-license" "$application/LICENSE" || restoration_failed=1
+        cp -p "$staging/old-environment" "$environment" || restoration_failed=1
+        if [ "$listener_was_active" -eq 1 ]; then
+            systemctl start creeper-listener || restoration_failed=1
+        fi
+        if [ "$worker_was_active" -eq 1 ]; then
+            systemctl start creeper-worker || restoration_failed=1
+        fi
+    fi
+    if [ "$restoration_failed" -eq 0 ]; then
+        rm -rf "$staging"
+    else
+        printf 'Update failed; restoration needs operator review. Protected backup: %s\\n' "$staging" >&2
+    fi
+    exit "$outcome"
+}
+trap finish_update EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+mkdir -p "$staging/new"
+printf '%s' '__ARCHIVE__' | base64 --decode > "$staging/source.tar.gz"
+tar -xzf "$staging/source.tar.gz" -C "$staging/new"
+for unchanged in requirements.txt deploy/creeper-listener.service deploy/creeper-worker.service; do
+    if ! cmp -s "$staging/new/$unchanged" "$application/$unchanged"; then
+        printf 'Refusing update: %s changed; dependency or service migrations need a separate reviewed deployment.\\n' "$unchanged" >&2
+        exit 1
+    fi
+done
+if grep -q '^CREEPER_GEMMA_MODEL=' "$environment"; then
+    if [ "$(sed -n 's/^CREEPER_GEMMA_MODEL=//p' "$environment")" != gemma3:1b ]; then
+        echo 'Refusing update: the configured Gemma model differs from gemma3:1b.' >&2
+        exit 1
+    fi
+fi
+chmod 755 "$staging/new/creeper"
+chmod 644 "$staging/new/creeper/"*.py
+PYTHONPYCACHEPREFIX="$staging/bytecode" "$application/.venv/bin/python" -m compileall -q "$staging/new/creeper"
+(
+    cd "$staging/new"
+    PYTHONDONTWRITEBYTECODE=1 "$application/.venv/bin/python" -c 'from creeper.gemma import GemmaReviewer; reviewer=GemmaReviewer("gemma3:1b"); print(reviewer.model,reviewer.digest)'
+)
+cp -p "$application/LICENSE" "$staging/old-license"
+cp -p "$environment" "$staging/old-environment"
+if systemctl is-active --quiet creeper-listener; then listener_was_active=1; fi
+if systemctl is-active --quiet creeper-worker; then worker_was_active=1; fi
+update_started=1
+systemctl stop creeper-worker creeper-listener
+mv "$application/creeper" "$staging/old-creeper"
+mv "$staging/new/creeper" "$application/creeper"
+cp "$staging/new/LICENSE" "$application/LICENSE"
+if ! grep -q '^CREEPER_GEMMA_MODEL=' "$environment"; then
+    printf 'CREEPER_GEMMA_MODEL=gemma3:1b\\n' >> "$environment"
+fi
+systemctl start creeper-listener creeper-worker
+for service in creeper-listener creeper-worker ollama; do
+    systemctl is-active --quiet "$service"
+done
+healthy=0
+for attempt in $(seq 1 20); do
+    if curl --fail --silent --max-time 2 http://127.0.0.1:8787/healthz; then
+        healthy=1
+        break
+    fi
+    sleep 0.5
+done
+if [ "$healthy" -ne 1 ]; then
+    echo 'Updated listener failed its bounded startup health check.' >&2
+    exit 1
+fi
+sha256sum "$staging/source.tar.gz"
+""".replace("__ARCHIVE__", encoded)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=["status", "connect-webhook", "test-push", "deliveries", "reports", "enable-gemma", "gemma-demo"])
@@ -42,8 +151,7 @@ def main():
     subscription = arguments.subscription
     endpoint = "repos/robs46859-eng/arkham-creeper/hooks"
     if arguments.action == "status":
-        script = "systemctl is-active creeper-listener creeper-worker nginx; test -f /var/lib/arkham-creeper/bootstrap-complete && echo bootstrap-complete; curl --fail --silent http://127.0.0.1:8787/healthz"
-        print(run_script(subscription, script))
+        print(run_script(subscription, status_script()))
     elif arguments.action == "reports":
         script = """cd /opt/arkham-creeper
 .venv/bin/python - <<'PY'
@@ -110,20 +218,7 @@ echo "$creeper_demo_dir"
         from provision import archive_source
         root = Path(__file__).resolve().parents[2]
         source = archive_source(root)
-        encoded = base64.b64encode(source).decode()
-        script = """set -euo pipefail
-test -f /var/lib/ollama/gemma-ready
-systemctl stop creeper-worker creeper-listener
-printf '%s' '__ARCHIVE__' | base64 --decode > /opt/creeper-update.tar.gz
-tar -xzf /opt/creeper-update.tar.gz -C /opt/arkham-creeper
-cd /opt/arkham-creeper
-.venv/bin/python -c 'from creeper.gemma import GemmaReviewer; reviewer=GemmaReviewer("gemma3:1b"); print(reviewer.model,reviewer.digest)'
-if ! grep -q '^CREEPER_GEMMA_MODEL=' /etc/arkham-creeper/environment; then printf 'CREEPER_GEMMA_MODEL=gemma3:1b\\n' >> /etc/arkham-creeper/environment; fi
-systemctl start creeper-listener creeper-worker
-systemctl is-active creeper-listener creeper-worker ollama
-sha256sum /opt/creeper-update.tar.gz
-""".replace("__ARCHIVE__", encoded)
-        observed = run_script(subscription, script)
+        observed = run_script(subscription, gemma_update_script(source))
         receipt = {"archive_sha256": hashlib.sha256(source).hexdigest(), "observed": observed, "model": "gemma3:1b"}
         (work / "gemma-deploy-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
         print(json.dumps(receipt, indent=2))
