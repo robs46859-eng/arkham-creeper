@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.creeper/
+evidence/
+.env

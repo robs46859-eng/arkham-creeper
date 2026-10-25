@@ -1,0 +1,33 @@
+[Unit]
+Description=Arkham Creeper read-only digestion worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=creeper
+Group=creeper
+WorkingDirectory=/opt/arkham-creeper
+EnvironmentFile=/etc/arkham-creeper/environment
+Environment=OMP_NUM_THREADS=1
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+StateDirectory=arkham-creeper
+StateDirectoryMode=0700
+UMask=0077
+ExecStart=/opt/arkham-creeper/.venv/bin/python -m creeper digest --state /var/lib/arkham-creeper
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+MemoryMax=768M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target
