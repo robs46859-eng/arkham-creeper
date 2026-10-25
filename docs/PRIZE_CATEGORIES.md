@@ -14,7 +14,7 @@ Measured fictional-code run on October 25, 2026:
 - The model was absent from Ollama’s running-model list after each review following `keep_alive: 0`.
 - Model: `gemma3:1b`, Gemma family `gemma3`, quantization `Q4_K_M`.
 - Model digest: `97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c`.
-- Runtime: Ollama 0.40.11. The reviewed suite has 63 focused tests, including the custom-domain deployment guards.
+- Runtime: Ollama 0.40.11. The reviewed suite has 65 focused tests, including the custom-domain deployment guards.
 - A separate trusted virtual HTTP fixture passes 13 tenant/consent probes; identical probes detect both deliberately faulty controls. This does not execute incoming code or certify a real application.
 
 [View measured demonstration](https://cthulhu.arkhamprison.com/) · [Machine-readable evidence](https://cthulhu.arkhamprison.com/demo/report.json)

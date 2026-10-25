@@ -32,10 +32,8 @@ class CustomDomainTests(unittest.TestCase):
         self.assertIn("proxy_read_timeout 15s;", configuration)
         self.assertIn("location = /report.json { return 302 /demo/report.json; }", configuration)
         self.assertIn("include /etc/nginx/snippets/creeper-demo.conf;", configuration)
-        self.assertIn("alias /var/www/creeper-demo/report.html;", configuration)
-        self.assertIn("add_header X-Content-Type-Options nosniff always;", configuration)
-        self.assertIn("add_header Cache-Control no-store always;", configuration)
-        self.assertIn("frame-ancestors 'none'; base-uri 'none'", configuration)
+        self.assertIn("location = / { return 302 /demo/report.html; }", configuration)
+        self.assertNotIn("alias /var/www/creeper-demo/report.html;", configuration)
         self.assertIn("location / { return 404; }", configuration)
         self.assertNotIn("11434", configuration)
         self.assertNotIn("/var/lib/", configuration)
@@ -180,8 +178,64 @@ curl() {
         self.assertIn("-checkend 0", script)
         self.assertIn("--resolve cthulhu.arkhamprison.com:443:127.0.0.1", script)
         self.assertIn("--resolve cthulhu.arkhamprison.com:80:127.0.0.1", script)
-        self.assertIn("for route in / /demo/report.json /healthz", script)
+        self.assertIn("--location --max-redirs 3 --proto '=https' --proto-redir '=https'", script)
+        self.assertIn("https://cthulhu.arkhamprison.com/demo/report.html", script)
+        self.assertIn("https://cthulhu.arkhamprison.com/demo/report.json", script)
+        self.assertIn("grep -F '<h1>Cthulhu Daemon</h1>'", script)
         self.assertNotIn("--insecure", script)
+
+    def test_root_upgrade_changes_only_known_alias_block_and_preserves_tls_additions(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            configuration, _ownership, _enabled = self.domain_files(root)
+            tls = "    listen 443 ssl;\n    ssl_certificate /etc/letsencrypt/live/cthulhu.arkhamprison.com/fullchain.pem;\n"
+            original = domain.nginx_configuration().replace(domain.ROOT_REDIRECT, domain.LEGACY_ROOT_BLOCK).replace("    listen 80;\n", tls)
+            configuration.write_text(original)
+            script = 'staging="' + temporary + '"\n' + domain.root_upgrade_script().replace("/etc/nginx/", temporary + "/")
+            result = subprocess.run(["bash", "-eu", "-c", script], text=True, capture_output=True, timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            candidate = root / "candidate"
+            expected = original.replace(domain.LEGACY_ROOT_BLOCK, domain.ROOT_REDIRECT)
+            self.assertEqual(candidate.read_text(), expected)
+            self.assertEqual(configuration.read_text(), original)
+            configuration.write_text(expected)
+            result = subprocess.run(["bash", "-eu", "-c", script], text=True, capture_output=True, timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(candidate.read_text(), expected)
+            configuration.write_text(expected.replace(domain.ROOT_REDIRECT, "    location = / { return 200; }\n"))
+            result = subprocess.run(["bash", "-eu", "-c", script], text=True, capture_output=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("unexpected managed root route", result.stderr)
+
+    def test_https_verification_retries_reload_race_but_rejects_persistent_failure_or_wrong_content(self):
+        for mode in ["first-failure", "persistent-failure", "wrong-content", "bad-status"]:
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temporary:
+                log = Path(temporary) / "curl.log"
+                prefix = """set -euo pipefail
+sleep() { return 0; }
+curl() {
+    printf 'call\\n' >> '__LOG__'
+    count=$(wc -l < '__LOG__')
+    if [ '__MODE__' = persistent-failure ] || { [ '__MODE__' = first-failure ] && [ "$count" -eq 1 ]; }; then return 22; fi
+    case "${!#}" in
+        http://*) printf '301' ;;
+        */healthz) printf '{"status":"afloat"}' ;;
+        */report.json) printf '200' ;;
+        *)
+            if [ '__MODE__' = wrong-content ]; then printf '<h1>Not the expected report</h1>'; else printf '<h1>Cthulhu Daemon</h1>'; fi
+            if [ '__MODE__' = bad-status ]; then printf '\\n302'; else printf '\\n200'; fi
+            ;;
+    esac
+}
+""".replace("__LOG__", str(log)).replace("__MODE__", mode)
+                result = subprocess.run(["bash", "-c", prefix + domain.verification_script()], text=True, capture_output=True, timeout=10)
+                if mode == "first-failure":
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertIn("landing/report content", result.stdout)
+                    self.assertEqual(len(log.read_text().splitlines()), 6)
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("failed bounded post-reload verification", result.stderr)
 
     def test_generated_scripts_have_valid_shell_syntax(self):
         for script in [domain.prepare_script(), domain.https_script(), domain.status_script()]:

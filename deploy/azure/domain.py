@@ -17,6 +17,15 @@ ENABLED = "/etc/nginx/sites-enabled/cthulhu-daemon"
 OWNERSHIP = CONFIGURATION + ".managed"
 HASH_CONFIGURATION = "/etc/nginx/conf.d/cthulhu-server-names.conf"
 HASH_OWNERSHIP = HASH_CONFIGURATION + ".managed"
+ROOT_REDIRECT = "    location = / { return 302 /demo/report.html; }\n"
+LEGACY_ROOT_BLOCK = """    location = / {
+        alias /var/www/creeper-demo/report.html;
+        default_type text/html;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Cache-Control no-store always;
+        add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'" always;
+    }
+"""
 
 
 def nginx_configuration():
@@ -26,13 +35,7 @@ def nginx_configuration():
     client_max_body_size 1m;
     client_body_timeout 10s;
     server_tokens off;
-    location = / {
-        alias /var/www/creeper-demo/report.html;
-        default_type text/html;
-        add_header X-Content-Type-Options nosniff always;
-        add_header Cache-Control no-store always;
-        add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'" always;
-    }
+    location = / { return 302 /demo/report.html; }
     location = /report.json { return 302 /demo/report.json; }
     include /etc/nginx/snippets/creeper-demo.conf;
     location = /healthz { proxy_pass http://127.0.0.1:8787; }
@@ -179,6 +182,23 @@ CTHULHU_HASH_GUARD
 """
 
 
+def root_upgrade_script():
+    return """python3 - "$staging/candidate" <<'CTHULHU_ROOT_UPGRADE'
+import sys
+from pathlib import Path
+configuration = Path('/etc/nginx/sites-available/cthulhu-daemon')
+content = configuration.read_text()
+legacy = __LEGACY_ROOT__
+redirect = __ROOT_REDIRECT__
+if content.count(legacy) == 1:
+    content = content.replace(legacy, redirect, 1)
+elif legacy in content or content.count(redirect) != 1:
+    raise RuntimeError('Refusing an unexpected managed root route')
+Path(sys.argv[1]).write_text(content)
+CTHULHU_ROOT_UPGRADE
+""".replace("__LEGACY_ROOT__", repr(LEGACY_ROOT_BLOCK)).replace("__ROOT_REDIRECT__", repr(ROOT_REDIRECT))
+
+
 def prepare_script():
     return """set -euo pipefail
 umask 077
@@ -208,6 +228,11 @@ CTHULHU_TEST
     changed=1
     install -m 644 "$staging/candidate" /etc/nginx/sites-available/cthulhu-daemon
     printf 'cthulhu.arkhamprison.com\\n' > /etc/nginx/sites-available/cthulhu-daemon.managed
+else
+""" + root_upgrade_script() + """    if ! cmp -s "$staging/candidate" /etc/nginx/sites-available/cthulhu-daemon; then
+        changed=1
+        install -m 644 "$staging/candidate" /etc/nginx/sites-available/cthulhu-daemon
+    fi
 fi
 if [ "$had_enabled" -eq 0 ]; then
     changed=1
@@ -234,6 +259,38 @@ printf '\\ncthulhu.arkhamprison.com HTTP virtual host prepared; existing Azure h
 """
 
 
+def verification_script():
+    return """verified_report() {
+    local response
+    response=$(curl --fail --silent --show-error --location --max-redirs 3 --proto '=https' --proto-redir '=https' --noproxy '*' --max-time 2 --resolve cthulhu.arkhamprison.com:443:127.0.0.1 -w '\\n%{http_code}' "$1") || return 1
+    [ "${response##*$'\\n'}" = 200 ] || return 1
+    printf '%s\\n' "$response" | grep -F '<h1>Cthulhu Daemon</h1>' > /dev/null
+}
+verified=0
+for attempt in $(seq 1 20); do
+    http_code=$(curl --silent --show-error --noproxy '*' --max-time 2 --resolve cthulhu.arkhamprison.com:80:127.0.0.1 -o /dev/null -w '%{http_code}' http://cthulhu.arkhamprison.com/ || true)
+    case "$http_code" in
+        301|302|307|308)
+            if verified_report https://cthulhu.arkhamprison.com/ &&
+               verified_report https://cthulhu.arkhamprison.com/demo/report.html &&
+               json_code=$(curl --fail --silent --show-error --location --max-redirs 3 --proto '=https' --proto-redir '=https' --noproxy '*' --max-time 2 --resolve cthulhu.arkhamprison.com:443:127.0.0.1 -o /dev/null -w '%{http_code}' https://cthulhu.arkhamprison.com/demo/report.json) &&
+               [ "$json_code" = 200 ] &&
+               curl --fail --silent --show-error --noproxy '*' --max-time 2 --resolve cthulhu.arkhamprison.com:443:127.0.0.1 https://cthulhu.arkhamprison.com/healthz | grep -E '"status"[[:space:]]*:[[:space:]]*"afloat"' > /dev/null; then
+                verified=1
+                break
+            fi
+            ;;
+    esac
+    sleep 0.5
+done
+if [ "$verified" -ne 1 ]; then
+    echo 'Custom-domain HTTPS routes failed bounded post-reload verification.' >&2
+    exit 1
+fi
+printf 'HTTP redirect, HTTPS landing/report content, JSON evidence, and listener health verified\\n'
+"""
+
+
 def status_script():
     return """set -euo pipefail
 nginx -t
@@ -245,16 +302,7 @@ certificate=/etc/letsencrypt/live/cthulhu.arkhamprison.com/fullchain.pem
 test -f "$certificate"
 openssl x509 -in "$certificate" -noout -checkhost cthulhu.arkhamprison.com
 openssl x509 -in "$certificate" -noout -checkend 0
-http_code=$(curl --silent --show-error --noproxy '*' --max-time 15 --resolve cthulhu.arkhamprison.com:80:127.0.0.1 -o /dev/null -w '%{http_code}' http://cthulhu.arkhamprison.com/)
-case "$http_code" in
-    301|302|307|308) printf 'HTTP redirects to HTTPS\\n' ;;
-    *) printf 'Expected HTTP redirect, observed %s\\n' "$http_code" >&2; exit 1 ;;
-esac
-for route in / /demo/report.json /healthz; do
-    curl --fail --silent --show-error --noproxy '*' --max-time 15 --resolve cthulhu.arkhamprison.com:443:127.0.0.1 -o /dev/null "https://cthulhu.arkhamprison.com$route"
-    printf 'HTTPS %s verified\\n' "$route"
-done
-"""
+""" + verification_script()
 
 
 def https_script():
