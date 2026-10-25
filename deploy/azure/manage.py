@@ -188,7 +188,7 @@ location = /demo/report.html {
     default_type text/html;
     add_header X-Content-Type-Options nosniff;
     add_header Cache-Control no-store;
-    add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'";
+    add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; font-src data:; frame-ancestors 'none'; base-uri 'none'";
 }
 location = /demo/report.json {
     alias /var/www/creeper-demo/report.json;

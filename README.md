@@ -30,6 +30,8 @@ python3 -m venv .venv
 
 The simulation prints its evidence directory. Open `report.html` for measured results and `report.json` for the full record. Each run requires a fresh directory. Evidence is gitignored: private adapters may store private snapshots there.
 
+The report uses the supplied eldritch-terminal visual direction: basalt surfaces, teal and violet accents, Cinzel headings, JetBrains Mono data, and Space Mono metadata. Fonts are embedded with their [SIL Open Font License notices](docs/fonts/README.md); no remote font service, JavaScript, or analytics is required. Section links and expandable probe records work without scripts. Saved-run labels, false-positive disclosures, failed outcomes, and the original measured JSON remain independent of presentation. Hosted reports require `font-src data:` alongside the otherwise restrictive content policy.
+
 ## Wire a repository
 
 Set `CREEPER_WEBHOOK_SECRET` to a high-entropy secret of at least 32 characters and `CREEPER_REPOSITORIES` to exact comma-separated repository names. Keep secrets in the service environment or secret manager, outside Git. `CREEPER_GITHUB_TOKEN` is optional for public sources; private sources need a narrowly scoped read-only token.
