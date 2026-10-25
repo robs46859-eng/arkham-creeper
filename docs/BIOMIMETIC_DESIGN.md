@@ -1,6 +1,6 @@
 # Six animal-inspired roles, one review pipeline
 
-The Arkham Creeper is a biomimetic Symbiont, not just a Man o’ War listener. These names describe engineering roles in one pipeline, not six autonomous agents or scientifically validated biological simulations.
+Cthulhu Daemon is a biomimetic Symbiont, not just a Man o’ War listener. These names describe engineering roles in one pipeline, not six autonomous agents or scientifically validated biological simulations.
 
 | Inspiration | Current engineering role | Boundary |
 | --- | --- | --- |
@@ -13,4 +13,4 @@ The Arkham Creeper is a biomimetic Symbiont, not just a Man o’ War listener. T
 
 The original concept's advanced wolf tracking and beaver patching remain future work. This build carries the broader animal-inspired design without representing those proposed capabilities as delivered features. Private products and their source stay outside this public installation.
 
-**Push your code. Let the current carry the busywork. Keep the final call.**
+**Code flows in. Evidence surfaces. You keep the final call.**

@@ -128,9 +128,9 @@ def render(evidence, path):
     extra = ""
     if external:
         extra = "<h2>Private application verification</h2><pre>" + html.escape(json.dumps(external, indent=2)) + "</pre>"
-    document = """<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Creeper · measured simulation</title>
+    document = """<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cthulhu Daemon · measured simulation</title>
 <style>body{margin:0;background:#071b20;color:#d9eeeb;font:16px system-ui;line-height:1.6}main{max-width:1000px;margin:auto;padding:48px 24px}h1{font-size:40px;line-height:1.1}h2{margin-top:40px;color:#77d6bb}small{color:#9fc1bb;overflow-wrap:anywhere}.tag{border:1px solid #77d6bb;border-radius:40px;padding:8px 15px;color:#77d6bb}section{display:flex;gap:16px;flex-wrap:wrap}article{background:#123139;padding:20px;flex:1;min-width:200px;border-radius:12px}table{width:100%;border-collapse:collapse}td{border-bottom:1px solid #285059;padding:12px}td:last-child{color:#77d6bb}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#123139;padding:20px;border-radius:12px}a{color:#77d6bb}</style>
-<main><span class="tag">SYNTHETIC INPUT · MEASURED EXECUTION</span><h1>The current carries the work.</h1><p>A biomimetic Symbiont: Man o’ War intake, nutcracker-inspired novelty memory, prairie-dog signal triage, dolphin model rest, wolf-like provenance, and beaver-like workflow resilience.</p><p>Signed ingress → inert queue → local AI review. Virtual security rehearsals exercise a separate trusted fictional fixture, never captured source.</p>"""
+<main><span class="tag">SYNTHETIC INPUT · MEASURED EXECUTION</span><h1>Cthulhu Daemon</h1><p><strong>Code flows in. Evidence surfaces. You keep the final call.</strong></p><p>A biomimetic Symbiont: Man o’ War intake, nutcracker-inspired novelty memory, prairie-dog signal triage, dolphin model rest, wolf-like provenance, and beaver-like workflow resilience.</p><p>Signed ingress → inert queue → local AI review. Virtual security rehearsals exercise a separate trusted fictional fixture, never captured source.</p>"""
     document += "<small>Run: " + escape(evidence["generated_at"]) + "</small><h2>Observed source scenarios</h2><section>" + files + "</section><h2>Boundary checks</h2><table>" + rows + "</table>"
     rehearsal = evidence.get("virtual_rehearsal")
     if rehearsal:
@@ -152,7 +152,7 @@ def render(evidence, path):
             document += "<article><h3>" + escape(report["delivery"] + " · " + advisor["model"]) + "</h3><p>" + escape(advisor["review"]["summary"]) + "</p><p>" + escape(advisor["prompt_tokens"]) + " input tokens · " + escape(advisor["output_tokens"]) + " output tokens · " + escape(advisor["elapsed_ms"]) + " ms</p><small>Model digest: " + escape(advisor["model_digest"]) + "</small></article>"
     else:
         document += "<p>This run contains no LLM inference.</p>"
-    document += "<p>Ingress mean: " + escape(evidence["ingress_latency_ms"]["mean"]) + " ms. Results use four fictional source scenarios; no production security outcomes or human time savings are inferred.</p><p><a href='report.json'>Full measured evidence</a></p><p><strong>Push your code. Let the current carry the busywork. Keep the final call.</strong></p></main></html>"
+    document += "<p>Ingress mean: " + escape(evidence["ingress_latency_ms"]["mean"]) + " ms. Results use four fictional source scenarios; no production security outcomes or human time savings are inferred.</p><p><a href='report.json'>Full measured evidence</a></p><p><strong>Code flows in. Evidence surfaces. You keep the final call.</strong></p></main></html>"
     Path(path).write_text(document)
     Path(path).chmod(0o600)
 

@@ -2,7 +2,7 @@
 
 Highlight describes session replay, error monitoring, logs, and distributed tracing in its [official repository](https://github.com/highlight/highlight). Its website now redirects to LaunchDarkly; the successor's [Vega documentation](https://launchdarkly.com/docs/fed-docs/home/observability/vega) already describes AI investigations and GitHub fixes. Merely adding an LLM summary is not a credible differentiator.
 
-Creeper's narrower direction is **source-inert change intake plus independently observable security-contract rehearsals**. That is a different workflow, not evidence of overall superiority or a replacement for mature production observability.
+Cthulhu Daemon's narrower direction is **source-inert change intake plus independently observable security-contract rehearsals**. That is a different workflow, not evidence of overall superiority or a replacement for mature production observability.
 
 ## What the build actually demonstrates
 

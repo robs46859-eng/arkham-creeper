@@ -1,6 +1,8 @@
-# The Arkham Creeper
+# Cthulhu Daemon
 
 A biomimetic code-review Symbiont: a Man o’ War captures repository events, with nutcracker-inspired novelty memory, prairie-dog signal triage, dolphin-inspired model rest, wolf-like provenance, and beaver-like workflow resilience. These are engineering metaphors, not six autonomous agents.
+
+**Code flows in. Evidence surfaces. You keep the final call.**
 
 The passive pipeline floats on repository webhooks, captures signed deliveries, keeps source inert, and digests it later with local open-source AI. See the [six animal-inspired roles and their limits](docs/BIOMIMETIC_DESIGN.md).
 
@@ -77,7 +79,9 @@ Week 3’s **Slow and Steady** theme rewards automation using open-source AI. Th
 
 The [challenge](https://dev.to/challenges/hacktoberfest-week3-2026-10-19) and [official rules](https://dev.to/page/hacktoberfest-week3-2026-10-19-contest-rules) require a DEV post, code, demo, and open-source AI at the core. The deadline is October 25, 2026, 11:59 p.m. PDT (October 26, 12:59 a.m. America/Denver). Work after the deadline must be identified here. This implementation does not submit a post or prize entry.
 
-The existing website at https://creeper.arkhamprison.com is a labeled simulated console. It is separate from the deployed listener and worker. A plain IsolationForest run is not evidence for a Gemma prize claim; use a completed Gemma-enabled run with model digest and measured tokens. No other partner integration is implied.
+[Cthulhu Daemon’s measured demonstration](https://cthulhu.arkhamprison.com/) and [machine-readable evidence](https://cthulhu.arkhamprison.com/demo/report.json) show the deployed fictional-data run. The legacy website at https://creeper.arkhamprison.com remains a labeled illustrative simulated console, separate from the deployed listener and worker. A plain IsolationForest run is not evidence for a Gemma prize claim; use a completed Gemma-enabled run with model digest and measured tokens. No other partner integration is implied.
+
+The GitHub repository, Python package, service names, and existing configuration identifiers retain `arkham-creeper` or `creeper` for compatibility; the public project name is Cthulhu Daemon.
 
 ## License
 

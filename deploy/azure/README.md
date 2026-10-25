@@ -23,4 +23,25 @@ Review the generated template, then use the same arguments with `--create`. The 
 
 Each operation takes `--subscription` and `--work`. The local work directory contains operational receipts and must not be published as source. `install-gemma.sh` installs the pinned official Ollama runtime and model on the new VM, binds inference to loopback, and limits it to one loaded model. Model terms are separate from the code license.
 
+## Cthulhu Daemon custom domain
+
+`domain.py` manages only `cthulhu.arkhamprison.com` on the existing isolated VM. It does not edit DNS, the original Azure hostname’s virtual host, the legacy illustrative console at `creeper.arkhamprison.com`, or any private application. The public repository, package, and service identifiers retain their existing names for compatibility.
+
+```sh
+python domain.py prepare --subscription <subscription-id> --work <private-work-directory>
+```
+
+The `prepare` operation adds a separate HTTP virtual host serving the existing measured report at `/`, with the same signed webhook route, bounded ingress, minimal health endpoint, and public demonstration routes. `/report.json` redirects to `/demo/report.json` so the report’s relative evidence link works at the domain root. Everything else returns 404. Candidate and complete Nginx configurations are validated before reload; unrelated or unmanaged domain configurations are rejected, and failed changes restore the previous domain configuration. Repeating preparation preserves a previously configured HTTPS virtual host rather than replacing it with HTTP-only settings.
+
+Where no explicit active server-name hash-bucket directive exists, preparation adds a dedicated owned `/etc/nginx/conf.d/cthulhu-server-names.conf` setting of `128` to accommodate both public hostnames. It refuses unknown existing explicit directives instead of overriding them. This small shared Nginx setting and its ownership record are backed up and restored with the domain configuration if validation or reload fails; existing virtual-host files remain untouched.
+
+After explicitly authorized DNS changes resolve the subdomain to the isolated VM’s current public IPv4 address, directly or through a CNAME to its Azure hostname, run:
+
+```sh
+python domain.py enable-https --subscription <subscription-id> --work <private-work-directory>
+python domain.py status --subscription <subscription-id> --work <private-work-directory>
+```
+
+Before requesting a certificate or changing the VM for HTTPS, the helper queries only the dedicated Azure public-IP resource and requires the domain’s resolved IPv4 set to match it exclusively. It requests a certificate for this exact hostname, enables HTTP-to-HTTPS redirection, and verifies certificate identity/expiry, listener and worker services, and local Host/SNI HTTP/HTTPS routes without disabling TLS verification. A DNS check is not proof of worldwide propagation; verify public HTTPS and the original Azure endpoint separately after changes. Any existing AAAA record must also be reviewed at the DNS provider before certificate issuance. Operational receipts contain no signing secret or private source and remain in the private work directory.
+
 The queue is single-host SQLite on persistent storage. Monitor disk usage, add retention/backups appropriate to the installation, and inspect dead letters privately. Recovered jobs retain their attempt counts; operator recovery should be audited. A monthly Azure budget is cost tracking, not a hard spending limit.

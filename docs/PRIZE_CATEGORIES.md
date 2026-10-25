@@ -2,7 +2,7 @@
 
 ## Best Use of Gemma — implemented
 
-The local open-weight Gemma 3 1B model performs contextual code triage and drafts structured review summaries and recommendations. It runs through Ollama on the same isolated CPU server as Creeper, with source-bearing requests confined to loopback. The model cannot execute code, apply patches, or lower configured review signals.
+The local open-weight Gemma 3 1B model performs contextual code triage and drafts structured review summaries and recommendations. It runs through Ollama on the same isolated CPU server as Cthulhu Daemon, with source-bearing requests confined to loopback. The model cannot execute code, apply patches, or lower configured review signals.
 
 The [challenge criteria](https://dev.to/challenges/hacktoberfest-week3-2026-10-19) allow Gemma running locally or through another hosting provider. The implementation uses Azure compute; no Google-hosted inference API is involved.
 
@@ -14,10 +14,10 @@ Measured fictional-code run on October 25, 2026:
 - The model was absent from Ollama’s running-model list after each review following `keep_alive: 0`.
 - Model: `gemma3:1b`, Gemma family `gemma3`, quantization `Q4_K_M`.
 - Model digest: `97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c`.
-- Runtime: Ollama 0.40.11. The reviewed suite has 49 focused tests.
+- Runtime: Ollama 0.40.11. The reviewed suite has 63 focused tests, including the custom-domain deployment guards.
 - A separate trusted virtual HTTP fixture passes 13 tenant/consent probes; identical probes detect both deliberately faulty controls. This does not execute incoming code or certify a real application.
 
-[View measured demonstration](https://arkham-creeper-hf26-b0760a60.northcentralus.cloudapp.azure.com/demo/report.html) · [Machine-readable evidence](https://arkham-creeper-hf26-b0760a60.northcentralus.cloudapp.azure.com/demo/report.json)
+[View measured demonstration](https://cthulhu.arkhamprison.com/) · [Machine-readable evidence](https://cthulhu.arkhamprison.com/demo/report.json)
 
 The input scenarios are synthetic and explicitly labeled. These numbers establish execution, not production detection accuracy, verified vulnerabilities, clinical outcomes, or human time saved. The original generation cap truncated some reviews; incomplete output failed safely, the cap and response length instructions were corrected, and a regression test was added before the successful run.
 
