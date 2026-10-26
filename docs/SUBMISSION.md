@@ -66,7 +66,25 @@ The pipeline code is MIT licensed. [Gemma’s separate terms](https://ai.google.
 
 ## My Agent Session
 
-I used OpenAI Codex for development assistance, testing, deployment, and this write-up. That assistance is separate from the product’s runtime AI: scikit-learn and local Gemma. The public source, tests, and fictional-data record are the shareable evidence; the development session is not published.
+I used **Gemini for the initial brainstorming**, exploring how the challenge’s “Slow and Steady” theme could become background review work. I asked about wolf-like traceability, beaver resilience, prairie-dog triage, and nutcracker memory, then added dolphin attention and a man o’ war intake layer.
+
+These selected excerpts show that design conversation—not implementation results.
+
+**My prompt about the animal processes (excerpt):**
+
+> integrate a dynamic scent trail similar to wolves, self-healing like a beaver dam, filter like a prairie dog system, and spatial Intel like a clarks nutcracker
+
+**My follow-up about orchestration:**
+
+> Create an addition to the submission that adds an orchestration similar to how the man ‘o war operates
+
+**Gemini identifying a gap in the early mock-loop design (excerpt):**
+
+> there was no actual external routing happening.
+
+That diagnosis mattered: a proposed gateway is not a verified integration. The conversation supplied the design brief, not proof of successful scans, quarantines, or patches. The delivered Symbiont deliberately narrows the ambitious brainstorm to signed durable intake, commit-bound provenance, bounded advisory analysis, and observed model unloading. Automatic repair, guaranteed vulnerability detection, and eliminated false positives are not delivered claims.
+
+I then used **OpenAI Codex** for implementation, testing, deployment, and this write-up. Gemini and Codex were development assistants; the product’s runtime AI is **scikit-learn and local Gemma**. The public source, tests, and measured fictional-data record establish what ran. Only these selected conversation excerpts are shared; the complete transcript remains private.
 
 ## The Lazy Payoff
 
