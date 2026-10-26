@@ -1,8 +1,6 @@
 # Beyond observability: the code-assurance direction
 
-Highlight describes session replay, error monitoring, logs, and distributed tracing in its [official repository](https://github.com/highlight/highlight). Its website now redirects to LaunchDarkly; the successor's [Vega documentation](https://launchdarkly.com/docs/fed-docs/home/observability/vega) already describes AI investigations and GitHub fixes. Merely adding an LLM summary is not a credible differentiator.
-
-Cthulhu Daemon's narrower direction is **source-inert change intake plus independently observable security-contract rehearsals**. That is a different workflow, not evidence of overall superiority or a replacement for mature production observability.
+Cthulhu Daemon combines **source-inert change intake with independently observable security-contract rehearsals**. It prepares review evidence without granting incoming code execution or patch authority. This complements production observability rather than replacing session replay, errors, logs, or tracing; no comparative superiority is claimed.
 
 ## What the build actually demonstrates
 

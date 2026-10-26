@@ -25,7 +25,7 @@ Each operation takes `--subscription` and `--work`. The local work directory con
 
 ## Cthulhu Daemon custom domain
 
-`domain.py` manages only `cthulhu.arkhamprison.com` on the existing isolated VM. It does not edit DNS, the original Azure hostname’s virtual host, the legacy illustrative console at `creeper.arkhamprison.com`, or any private application. The public repository, package, and service identifiers retain their existing names for compatibility.
+`domain.py` manages only `cthulhu.arkhamprison.com` on the existing isolated VM. It does not edit DNS, the original Azure hostname’s virtual host, other sites, or private applications. The public repository, package, and service identifiers retain their existing names for compatibility.
 
 ```sh
 python domain.py prepare --subscription <subscription-id> --work <private-work-directory>

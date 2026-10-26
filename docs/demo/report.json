@@ -1,0 +1,838 @@
+{
+  "generated_at": "2026-10-25T19:12:46.030354+00:00",
+  "mode": "synthetic_data_real_execution",
+  "transport": "real loopback HTTP with GitHub-style HMAC-SHA256",
+  "github_delivery": "synthetic; no real GitHub webhook claimed",
+  "model": {
+    "engine": "scikit-learn IsolationForest",
+    "version": "1.9.1",
+    "seed": 42,
+    "training": "120 generated benign snippets; synthetic baseline only",
+    "training_sha256": "e556bb592547448940edaa6e49e570e1bb8dda688bcd452467e5676e387bbbf2",
+    "meaning": "Novelty signal, not vulnerability verification or a security accuracy benchmark"
+  },
+  "checks": [
+    {
+      "name": "invalid HMAC rejected over HTTP",
+      "observed": 401,
+      "expected": 401,
+      "passed": true
+    },
+    {
+      "name": "wrong repository rejected over HTTP",
+      "observed": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "benign durably accepted over HTTP",
+      "observed": 202,
+      "expected": 202,
+      "passed": true
+    },
+    {
+      "name": "sql-risk durably accepted over HTTP",
+      "observed": 202,
+      "expected": 202,
+      "passed": true
+    },
+    {
+      "name": "executable-payload durably accepted over HTTP",
+      "observed": 202,
+      "expected": 202,
+      "passed": true
+    },
+    {
+      "name": "novel-module durably accepted over HTTP",
+      "observed": 202,
+      "expected": 202,
+      "passed": true
+    },
+    {
+      "name": "duplicate delivery acknowledged",
+      "observed": true,
+      "expected": true,
+      "passed": true
+    },
+    {
+      "name": "mismatched replay rejected",
+      "observed": 409,
+      "expected": 409,
+      "passed": true
+    },
+    {
+      "name": "pending queue survives reopening",
+      "observed": 4,
+      "expected": 4,
+      "passed": true
+    },
+    {
+      "name": "all jobs complete",
+      "observed": [
+        "done",
+        "done",
+        "done",
+        "done"
+      ],
+      "expected": [
+        "done",
+        "done",
+        "done",
+        "done"
+      ],
+      "passed": true
+    },
+    {
+      "name": "benign source has no configured rule match",
+      "observed": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "interpolated SQL requires review",
+      "observed": "review_required",
+      "expected": "review_required",
+      "passed": true
+    },
+    {
+      "name": "executable source requires review",
+      "observed": "review_required",
+      "expected": "review_required",
+      "passed": true
+    },
+    {
+      "name": "AI routes a novel module for review without alleging a vulnerability",
+      "observed": "novelty_review_required",
+      "expected": "novelty_review_required",
+      "passed": true
+    },
+    {
+      "name": "payload did not create its sentinel",
+      "observed": false,
+      "expected": false,
+      "passed": true
+    },
+    {
+      "name": "no automatic patches claimed",
+      "observed": false,
+      "expected": false,
+      "passed": true
+    },
+    {
+      "name": "virtual security contracts pass in secure fixture",
+      "observed": true,
+      "expected": true,
+      "passed": true
+    },
+    {
+      "name": "both deliberately faulty negative controls are detected",
+      "observed": true,
+      "expected": true,
+      "passed": true
+    }
+  ],
+  "reports": [
+    {
+      "delivery": "benign",
+      "source": {
+        "simulation": true,
+        "coverage": "explicit_synthetic_fixtures",
+        "repository": "simulation/fictional-clinic"
+      },
+      "files": [
+        {
+          "path": "clinic/read.py",
+          "sha256": "6805e56bfb57c5a863f80581bab713baff1aba22d6dc802fd20418928bdda78d",
+          "bytes": 69,
+          "spatial": {
+            "features": [
+              69,
+              2,
+              0,
+              2,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "anomalous": false,
+            "score": 0.08070262542611578
+          },
+          "findings": [],
+          "finding_count": 0,
+          "findings_truncated": false
+        }
+      ],
+      "model": {
+        "engine": "scikit-learn IsolationForest",
+        "version": "1.9.1",
+        "seed": 42,
+        "training": "120 generated benign snippets; synthetic baseline only",
+        "training_sha256": "e556bb592547448940edaa6e49e570e1bb8dda688bcd452467e5676e387bbbf2",
+        "meaning": "Novelty signal, not vulnerability verification or a security accuracy benchmark"
+      },
+      "disposition": "no_configured_rule_match",
+      "execution": "source stored and examined as data; never imported, evaluated, or written as executable files",
+      "patch_applied": false,
+      "elapsed_ms": 11586.448,
+      "gemma": {
+        "status": "advisory",
+        "model": "gemma3:1b",
+        "family": "gemma3",
+        "model_digest": "97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c",
+        "runtime": "Ollama 0.40.11",
+        "endpoint": "loopback only; proxies disabled",
+        "review": {
+          "priority": "routine",
+          "summary": "This Python function returns a pet's name based on a record. It utilizes a `get()` method to safely access a 'name' field within a record dictionary.  Potential vulnerabilities exist in the `get()` implementation.",
+          "recommendations": [
+            "Implement robust error handling for missing 'name' fields.",
+            "Validate the 'name' field to prevent unexpected data.",
+            "Ensure the return value is appropriately sanitized to avoid injection."
+          ]
+        },
+        "selected_files": 1,
+        "total_files": 1,
+        "excerpt_limit_chars_per_file": 1200,
+        "prompt_limit_bytes": 2000,
+        "prompt_bytes": 248,
+        "excerpt_characters": [
+          69
+        ],
+        "truncated_files": [],
+        "truncated_prompt_paths": [],
+        "prompt_tokens": 161,
+        "output_tokens": 107,
+        "elapsed_ms": 11559.703,
+        "keep_alive_requested": 0,
+        "unloaded_after_review": true,
+        "limitations": "Bounded advisory excerpts; not complete code coverage or verified security findings"
+      }
+    },
+    {
+      "delivery": "sql-risk",
+      "source": {
+        "simulation": true,
+        "coverage": "explicit_synthetic_fixtures",
+        "repository": "simulation/fictional-clinic"
+      },
+      "files": [
+        {
+          "path": "clinic/query.py",
+          "sha256": "4cb99a343cf971b7cfacfc9abb8e3558352602e522bb87fd3714851f66d85633",
+          "bytes": 71,
+          "spatial": {
+            "features": [
+              71,
+              2,
+              0,
+              1,
+              1,
+              1,
+              0,
+              1,
+              0
+            ],
+            "anomalous": false,
+            "score": 0.08212089019301688
+          },
+          "findings": [
+            {
+              "rule": "sql_interpolation",
+              "line": 2,
+              "status": "review_required",
+              "recommendation": "Use parameterized SQL; validate tenant and consent independently."
+            }
+          ],
+          "finding_count": 1,
+          "findings_truncated": false
+        }
+      ],
+      "model": {
+        "engine": "scikit-learn IsolationForest",
+        "version": "1.9.1",
+        "seed": 42,
+        "training": "120 generated benign snippets; synthetic baseline only",
+        "training_sha256": "e556bb592547448940edaa6e49e570e1bb8dda688bcd452467e5676e387bbbf2",
+        "meaning": "Novelty signal, not vulnerability verification or a security accuracy benchmark"
+      },
+      "disposition": "review_required",
+      "execution": "source stored and examined as data; never imported, evaluated, or written as executable files",
+      "patch_applied": false,
+      "elapsed_ms": 10607.127,
+      "gemma": {
+        "status": "advisory",
+        "model": "gemma3:1b",
+        "family": "gemma3",
+        "model_digest": "97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c",
+        "runtime": "Ollama 0.40.11",
+        "endpoint": "loopback only; proxies disabled",
+        "review": {
+          "priority": "routine",
+          "summary": "This Python function uses string interpolation to construct SQL queries. It\u2019s vulnerable to SQL injection if the input 'name' is not properly sanitized.",
+          "recommendations": [
+            "Use parameterized queries or escaping to prevent SQL injection.",
+            "Validate and sanitize the 'name' input before constructing the query.",
+            "Implement strict input validation to limit potential malicious input."
+          ]
+        },
+        "selected_files": 1,
+        "total_files": 1,
+        "excerpt_limit_chars_per_file": 1200,
+        "prompt_limit_bytes": 2000,
+        "prompt_bytes": 272,
+        "excerpt_characters": [
+          71
+        ],
+        "truncated_files": [],
+        "truncated_prompt_paths": [],
+        "prompt_tokens": 164,
+        "output_tokens": 91,
+        "elapsed_ms": 10582.699,
+        "keep_alive_requested": 0,
+        "unloaded_after_review": true,
+        "limitations": "Bounded advisory excerpts; not complete code coverage or verified security findings"
+      }
+    },
+    {
+      "delivery": "executable-payload",
+      "source": {
+        "simulation": true,
+        "coverage": "explicit_synthetic_fixtures",
+        "repository": "simulation/fictional-clinic"
+      },
+      "files": [
+        {
+          "path": "clinic/import.py",
+          "sha256": "f577f1be87170026bb82ef65c8cc471ee0a81e79aa808ed8613435fd238fe270",
+          "bytes": 215,
+          "spatial": {
+            "features": [
+              215,
+              5,
+              2,
+              4,
+              0,
+              0,
+              1,
+              0,
+              1
+            ],
+            "anomalous": false,
+            "score": 0.07057867137051721
+          },
+          "findings": [
+            {
+              "rule": "shell_execution",
+              "line": 4,
+              "status": "review_required",
+              "recommendation": "Review shell construction; use a fixed executable and argument list."
+            },
+            {
+              "rule": "dynamic_execution",
+              "line": 5,
+              "status": "review_required",
+              "recommendation": "Remove dynamic evaluation of untrusted content."
+            }
+          ],
+          "finding_count": 2,
+          "findings_truncated": false
+        }
+      ],
+      "model": {
+        "engine": "scikit-learn IsolationForest",
+        "version": "1.9.1",
+        "seed": 42,
+        "training": "120 generated benign snippets; synthetic baseline only",
+        "training_sha256": "e556bb592547448940edaa6e49e570e1bb8dda688bcd452467e5676e387bbbf2",
+        "meaning": "Novelty signal, not vulnerability verification or a security accuracy benchmark"
+      },
+      "disposition": "review_required",
+      "execution": "source stored and examined as data; never imported, evaluated, or written as executable files",
+      "patch_applied": false,
+      "elapsed_ms": 14145.66,
+      "gemma": {
+        "status": "advisory",
+        "model": "gemma3:1b",
+        "family": "gemma3",
+        "model_digest": "97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c",
+        "runtime": "Ollama 0.40.11",
+        "endpoint": "loopback only; proxies disabled",
+        "review": {
+          "priority": "review",
+          "summary": "This code snippet demonstrates a potential for dynamic execution via shell execution, leveraging `subprocess` and writing to a file. It\u2019s a risky practice requiring careful consideration of potential vulnerabilities.",
+          "recommendations": [
+            "Implement strict input validation and sanitization of user-provided data to prevent malicious file writing.",
+            "Ensure the `user_input` is properly escaped or filtered to avoid shell injection.",
+            "Thoroughly analyze the `PAYLOAD_MUST_NOT_EXECUTE` file to understand its purpose and potential impact."
+          ]
+        },
+        "selected_files": 1,
+        "total_files": 1,
+        "excerpt_limit_chars_per_file": 1200,
+        "prompt_limit_bytes": 2000,
+        "prompt_bytes": 436,
+        "excerpt_characters": [
+          215
+        ],
+        "truncated_files": [],
+        "truncated_prompt_paths": [],
+        "prompt_tokens": 229,
+        "output_tokens": 125,
+        "elapsed_ms": 14121.371,
+        "keep_alive_requested": 0,
+        "unloaded_after_review": true,
+        "limitations": "Bounded advisory excerpts; not complete code coverage or verified security findings"
+      }
+    },
+    {
+      "delivery": "novel-module",
+      "source": {
+        "simulation": true,
+        "coverage": "explicit_synthetic_fixtures",
+        "repository": "simulation/fictional-clinic"
+      },
+      "files": [
+        {
+          "path": "clinic/large_module.py",
+          "sha256": "57ef6fc5f3238fbdee7d3ee44169942638aae821a61ac15b99994fc969f63819",
+          "bytes": 54000,
+          "spatial": {
+            "features": [
+              54000,
+              2000,
+              0,
+              2000,
+              0,
+              1000,
+              0,
+              0,
+              0
+            ],
+            "anomalous": true,
+            "score": -0.08652781551225053
+          },
+          "findings": [],
+          "finding_count": 0,
+          "findings_truncated": false
+        }
+      ],
+      "model": {
+        "engine": "scikit-learn IsolationForest",
+        "version": "1.9.1",
+        "seed": 42,
+        "training": "120 generated benign snippets; synthetic baseline only",
+        "training_sha256": "e556bb592547448940edaa6e49e570e1bb8dda688bcd452467e5676e387bbbf2",
+        "meaning": "Novelty signal, not vulnerability verification or a security accuracy benchmark"
+      },
+      "disposition": "novelty_review_required",
+      "execution": "source stored and examined as data; never imported, evaluated, or written as executable files",
+      "patch_applied": false,
+      "elapsed_ms": 20584.477,
+      "gemma": {
+        "status": "advisory",
+        "model": "gemma3:1b",
+        "family": "gemma3",
+        "model_digest": "97558784bdc9175075a72655bf360b15da17df6b3b9e5182af9f8c0c8e58ba7c",
+        "runtime": "Ollama 0.40.11",
+        "endpoint": "loopback only; proxies disabled",
+        "review": {
+          "priority": "review",
+          "summary": "The code defines a function `format_pet` that retrieves the 'name' field from a record. It\u2019s a simple function with no apparent vulnerabilities.",
+          "recommendations": [
+            "Validate the input 'record' to ensure it's a record object with a 'name' field.",
+            "Implement input validation to prevent unexpected data types or missing 'name' fields.",
+            "Consider adding a check to ensure the 'name' field is not empty."
+          ]
+        },
+        "selected_files": 1,
+        "total_files": 1,
+        "excerpt_limit_chars_per_file": 1200,
+        "prompt_limit_bytes": 2000,
+        "prompt_bytes": 1428,
+        "excerpt_characters": [
+          1200
+        ],
+        "truncated_files": [
+          "clinic/large_module.py"
+        ],
+        "truncated_prompt_paths": [],
+        "prompt_tokens": 519,
+        "output_tokens": 114,
+        "elapsed_ms": 20552.835,
+        "keep_alive_requested": 0,
+        "unloaded_after_review": true,
+        "limitations": "Bounded advisory excerpts; not complete code coverage or verified security findings"
+      }
+    }
+  ],
+  "virtual_rehearsal": {
+    "engine": "fixed fictional tenant-and-consent contract rehearsal",
+    "engine_source_sha256": "5233f44d97c8776477fa19fcb5e8ee6c6d071ad4ff61d845c45baf64a89754fd",
+    "mode": "synthetic_data_real_execution",
+    "transport": "real loopback HTTP; proxies disabled",
+    "secure_fixture": {
+      "case_id": "secure_fixture",
+      "checks": [
+        {
+          "probe_id": "unauthenticated_read_rejected",
+          "expected": 401,
+          "observed": 401,
+          "passed": true
+        },
+        {
+          "probe_id": "owner_read_allowed",
+          "expected": 200,
+          "observed": 200,
+          "passed": true
+        },
+        {
+          "probe_id": "cross_tenant_read_rejected",
+          "expected": 403,
+          "observed": 403,
+          "passed": true
+        },
+        {
+          "probe_id": "cross_tenant_write_rejected",
+          "expected": 403,
+          "observed": 403,
+          "passed": true
+        },
+        {
+          "probe_id": "cross_tenant_rejection_preserves_record",
+          "expected": {
+            "id": "fictional-pet-001",
+            "tenant": "fictional-clinic-alpha",
+            "note": "baseline"
+          },
+          "observed": {
+            "id": "fictional-pet-001",
+            "tenant": "fictional-clinic-alpha",
+            "note": "baseline"
+          },
+          "passed": true
+        },
+        {
+          "probe_id": "consented_owner_write_allowed",
+          "expected": 200,
+          "observed": 200,
+          "passed": true
+        },
+        {
+          "probe_id": "consented_write_is_observable",
+          "expected": "authorized fictional update",
+          "observed": "authorized fictional update",
+          "passed": true
+        },
+        {
+          "probe_id": "consent_revocation_allowed",
+          "expected": 200,
+          "observed": 200,
+          "passed": true
+        },
+        {
+          "probe_id": "consent_revocation_is_observable",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "probe_id": "revoked_consent_write_rejected",
+          "expected": 403,
+          "observed": 403,
+          "passed": true
+        },
+        {
+          "probe_id": "consent_rejection_preserves_record",
+          "expected": {
+            "id": "fictional-pet-001",
+            "tenant": "fictional-clinic-alpha",
+            "note": "authorized fictional update"
+          },
+          "observed": {
+            "id": "fictional-pet-001",
+            "tenant": "fictional-clinic-alpha",
+            "note": "authorized fictional update"
+          },
+          "passed": true
+        },
+        {
+          "probe_id": "unauthenticated_write_rejected",
+          "expected": 401,
+          "observed": 401,
+          "passed": true
+        },
+        {
+          "probe_id": "unauthenticated_rejection_preserves_record",
+          "expected": {
+            "id": "fictional-pet-001",
+            "tenant": "fictional-clinic-alpha",
+            "note": "authorized fictional update"
+          },
+          "observed": {
+            "id": "fictional-pet-001",
+            "tenant": "fictional-clinic-alpha",
+            "note": "authorized fictional update"
+          },
+          "passed": true
+        }
+      ],
+      "assertions_passed": true,
+      "checks_passed": 13,
+      "checks_total": 13,
+      "detected_violations": []
+    },
+    "negative_controls": [
+      {
+        "case_id": "cross_tenant_bypass",
+        "checks": [
+          {
+            "probe_id": "unauthenticated_read_rejected",
+            "expected": 401,
+            "observed": 401,
+            "passed": true
+          },
+          {
+            "probe_id": "owner_read_allowed",
+            "expected": 200,
+            "observed": 200,
+            "passed": true
+          },
+          {
+            "probe_id": "cross_tenant_read_rejected",
+            "expected": 403,
+            "observed": 200,
+            "passed": false
+          },
+          {
+            "probe_id": "cross_tenant_write_rejected",
+            "expected": 403,
+            "observed": 200,
+            "passed": false
+          },
+          {
+            "probe_id": "cross_tenant_rejection_preserves_record",
+            "expected": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "baseline"
+            },
+            "observed": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "unauthorized change"
+            },
+            "passed": false
+          },
+          {
+            "probe_id": "consented_owner_write_allowed",
+            "expected": 200,
+            "observed": 200,
+            "passed": true
+          },
+          {
+            "probe_id": "consented_write_is_observable",
+            "expected": "authorized fictional update",
+            "observed": "authorized fictional update",
+            "passed": true
+          },
+          {
+            "probe_id": "consent_revocation_allowed",
+            "expected": 200,
+            "observed": 200,
+            "passed": true
+          },
+          {
+            "probe_id": "consent_revocation_is_observable",
+            "expected": false,
+            "observed": false,
+            "passed": true
+          },
+          {
+            "probe_id": "revoked_consent_write_rejected",
+            "expected": 403,
+            "observed": 403,
+            "passed": true
+          },
+          {
+            "probe_id": "consent_rejection_preserves_record",
+            "expected": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "authorized fictional update"
+            },
+            "observed": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "authorized fictional update"
+            },
+            "passed": true
+          },
+          {
+            "probe_id": "unauthenticated_write_rejected",
+            "expected": 401,
+            "observed": 401,
+            "passed": true
+          },
+          {
+            "probe_id": "unauthenticated_rejection_preserves_record",
+            "expected": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "authorized fictional update"
+            },
+            "observed": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "authorized fictional update"
+            },
+            "passed": true
+          }
+        ],
+        "assertions_passed": false,
+        "checks_passed": 10,
+        "checks_total": 13,
+        "detected_violations": [
+          "cross_tenant_read_rejected",
+          "cross_tenant_write_rejected",
+          "cross_tenant_rejection_preserves_record"
+        ]
+      },
+      {
+        "case_id": "consent_bypass",
+        "checks": [
+          {
+            "probe_id": "unauthenticated_read_rejected",
+            "expected": 401,
+            "observed": 401,
+            "passed": true
+          },
+          {
+            "probe_id": "owner_read_allowed",
+            "expected": 200,
+            "observed": 200,
+            "passed": true
+          },
+          {
+            "probe_id": "cross_tenant_read_rejected",
+            "expected": 403,
+            "observed": 403,
+            "passed": true
+          },
+          {
+            "probe_id": "cross_tenant_write_rejected",
+            "expected": 403,
+            "observed": 403,
+            "passed": true
+          },
+          {
+            "probe_id": "cross_tenant_rejection_preserves_record",
+            "expected": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "baseline"
+            },
+            "observed": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "baseline"
+            },
+            "passed": true
+          },
+          {
+            "probe_id": "consented_owner_write_allowed",
+            "expected": 200,
+            "observed": 200,
+            "passed": true
+          },
+          {
+            "probe_id": "consented_write_is_observable",
+            "expected": "authorized fictional update",
+            "observed": "authorized fictional update",
+            "passed": true
+          },
+          {
+            "probe_id": "consent_revocation_allowed",
+            "expected": 200,
+            "observed": 200,
+            "passed": true
+          },
+          {
+            "probe_id": "consent_revocation_is_observable",
+            "expected": false,
+            "observed": false,
+            "passed": true
+          },
+          {
+            "probe_id": "revoked_consent_write_rejected",
+            "expected": 403,
+            "observed": 200,
+            "passed": false
+          },
+          {
+            "probe_id": "consent_rejection_preserves_record",
+            "expected": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "authorized fictional update"
+            },
+            "observed": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "revoked change"
+            },
+            "passed": false
+          },
+          {
+            "probe_id": "unauthenticated_write_rejected",
+            "expected": 401,
+            "observed": 401,
+            "passed": true
+          },
+          {
+            "probe_id": "unauthenticated_rejection_preserves_record",
+            "expected": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "revoked change"
+            },
+            "observed": {
+              "id": "fictional-pet-001",
+              "tenant": "fictional-clinic-alpha",
+              "note": "revoked change"
+            },
+            "passed": true
+          }
+        ],
+        "assertions_passed": false,
+        "checks_passed": 11,
+        "checks_total": 13,
+        "detected_violations": [
+          "revoked_consent_write_rejected",
+          "consent_rejection_preserves_record"
+        ]
+      }
+    ],
+    "both_controls_detected": true,
+    "assertions_passed": true,
+    "limitations": [
+      "Only fixed trusted fictional fixture code is executed; incoming source is never executed",
+      "Negative controls deliberately bypass one boundary each; violations are expected and must be detected",
+      "Not certification of a real application, production isolation, or complete security coverage",
+      "No private application source, real records, credentials, or provider calls are used"
+    ]
+  },
+  "ingress_latency_ms": {
+    "count": 8,
+    "max": 17.278,
+    "mean": 8.064
+  },
+  "external_before": null,
+  "external_after": null,
+  "limitations": [
+    "Four synthetic scenarios plus any supplied private snapshot; not an accuracy benchmark",
+    "No verified zero-days, automatic patching, or production isolation claimed",
+    "A data-only queue is not an OS execution sandbox"
+  ]
+}

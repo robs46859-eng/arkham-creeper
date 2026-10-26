@@ -1,4 +1,4 @@
-# Man o’ War orchestration
+# Cthulhu Daemon architecture
 
 ```mermaid
 flowchart LR
@@ -25,7 +25,7 @@ Deep-water memory is a private SQLite database. Source is stored in BLOBs and ex
 
 Each claim has a lease token. Expired jobs can be reclaimed; stale workers cannot overwrite a newer claim. Source storage and completion must acknowledge the current claim before the worker reports success; lost ownership produces `analysis_unavailable` with `LeaseLost`. Errors get exponential retries and dead-letter after three claims. Lease expiry may cause duplicate read-only analysis; exactly-once model execution is not claimed.
 
-The local open-source AI is scikit-learn IsolationForest, trained on a reproducible synthetic benign corpus. Every report includes model version, seed, and training fingerprint. Novelty scores are advisory. Three separate configured text rules identify SQL interpolation, shell execution, and dynamic evaluation for review. SQL review signals are bounded to one per matching line; reports retain at most 256 finding details per file and explicitly record total counts and truncation. Neither a score nor a pattern match verifies a zero-day. The old prototype’s hardcoded verified findings and patch-applied claims have been removed.
+The local open-source AI is scikit-learn IsolationForest, trained on a reproducible synthetic benign corpus. Every report includes model version, seed, and training fingerprint. Novelty scores are advisory. Three separate configured text rules identify SQL interpolation, shell execution, and dynamic evaluation for review. SQL review signals are bounded to one per matching line; reports retain at most 256 finding details per file and explicitly record total counts and truncation. Neither a score nor a pattern match verifies a zero-day.
 
 When explicitly configured, a local Gemma model adds contextual review summaries and recommendations. The full prompt is bounded to 2,000 UTF-8 bytes, including deduplicated rule names and bounded display paths, within a configured 4,096-token context. It receives excerpts over loopback with proxies disabled, has no tools or execution path, cannot lower existing rule dispositions, and records model digest, token usage, elapsed time, actual excerpt coverage, and observed unload state. Digest checks before and after inference detect tag drift; the local runtime and model administration remain trusted. Malformed or unavailable inference fails the job for retry instead of silently claiming a completed model review.
 
@@ -47,6 +47,6 @@ A private adapter can run the actual application’s test APIs on loopback, feed
 
 The Python listener binds to 127.0.0.1 and needs a supported HTTPS reverse proxy with request/connection limits and timeouts. Run listener and worker as unprivileged services with private state. SQLite requires one host and persistent local storage; it is unsuitable for ephemeral autoscaling instances or a network filesystem. Multi-host deployment needs a shared transactional queue implementation.
 
-Expose only `/webhooks/github` and minimal `/healthz`. Health means the listener responds, not that GitHub retrieval or the worker is ready. Monitor pending/dead jobs and disk usage privately. HTTP 503 signals backpressure; GitHub failed-delivery redelivery must be handled operationally. Add a retention policy for completed private snapshots before production use.
+Proxy only `/webhooks/github` and minimal `/healthz` to the listener. Health means the listener responds, not that GitHub retrieval or the worker is ready. Monitor pending/dead jobs and disk usage privately. HTTP 503 signals backpressure; GitHub failed-delivery redelivery must be handled operationally. Add a retention policy for completed private snapshots before production use.
 
-The existing public UI remains a labeled simulated display until an authenticated, redacted report integration is deployed. No private source is sent to it.
+The public demo serves only the saved fictional-data report and its measured JSON. Operational source reviews and private application reports are not published to that page. Public report routes must be explicitly allowlisted; do not expose the queue, model endpoint, environment files, or arbitrary report directories.

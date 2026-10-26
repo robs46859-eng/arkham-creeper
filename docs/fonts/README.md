@@ -2,7 +2,7 @@
 
 The measured report embeds three unmodified Latin WOFF2 assets from the official Google Fonts distribution in `creeper/report_fonts.py`. `REPORT_FONT_CSS` contains data URLs, so rendering makes no external font requests and requires no CDN scripts. The shared SIL Open Font License 1.1 text and all three copyright notices are embedded in that CSS for redistributions of the standalone report. The original per-family notices are retained alongside this document.
 
-The user-supplied terminal screenshot uses Cinzel headings, JetBrains Mono body/data text, and Space Mono metadata. Its separate design notes specify a different heading face; the screenshot and supplied HTML are the visual reference for this implementation.
+The terminal report uses Cinzel headings, JetBrains Mono body/data text, and Space Mono metadata.
 
 | Family | Style | Subset | Bytes | SHA-256 |
 | --- | --- | --- | --- | --- |
